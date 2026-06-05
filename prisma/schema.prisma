@@ -8,6 +8,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
 enum UserRole {
   SUPER_ADMIN
   COMMUNITY_ADMIN
@@ -26,53 +30,371 @@ enum OTPType {
   TWO_FACTOR
 }
 
+enum PlanType {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  MOBILE_BANKING
+}
+
+enum PaymentStatus {
+  SUCCESS
+  PENDING
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  REFUNDED
+  UNCOLLECTIBLE
+}
+
+enum Currency {
+  BDT
+  USD
+  EUR
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  SUBSCRIPTION_CHANGE
+  PAYMENT_ATTEMPT
+}
+
+enum SubscriptionChangeReason {
+  NEW_SUBSCRIPTION
+  UPGRADED
+  DOWNGRADED
+  RENEWED
+  CANCELLED
+  SUSPENDED
+  REACTIVATED
+  EXPIRED
+  ADMIN_OVERRIDE
+  TRIAL_STARTED
+  TRIAL_ENDED
+}
+
+// ─────────────────────────────────────────────
+// USER & AUTH
+// ─────────────────────────────────────────────
+
 model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  firstName       String
-  lastName        String?
-  role            UserRole
-  passwordHash    String
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  phone        String?  @unique
+  firstName    String
+  lastName     String?
+  role         UserRole
+  passwordHash String
+
   emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  lastLoginAt     DateTime?
   avatarUrl       String?
-  communityId     Int?
+
+  communityId Int?
+
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  otps      OTP[]
-  community Community? @relation(fields: [communityId], references: [id])
+  community          Community?     @relation(fields: [communityId], references: [id])
+  createdCommunities Community[]    @relation("CommunityCreator")
+  otps               OTP[]
+  subscriptions      Subscription[]
+  auditLogs          AuditLog[]
 }
 
 model OTP {
-  id         Int      @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   identifier String
-  code       String
+  codeHash   String
   type       OTPType
   userId     Int?
-  expiresAt  DateTime
-  verified   Boolean  @default(false)
-  attempts   Int      @default(0)
+
+  expiresAt   DateTime
+  verified    Boolean   @default(false)
+  verifiedAt  DateTime?
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5)
+  ipAddress   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([identifier, type])
+  @@index([userId])
 }
 
-model Community {
-  id Int @id @default(autoincrement())
+// ─────────────────────────────────────────────
+// COMMUNITY
+// ─────────────────────────────────────────────
 
+model Community {
+  id             Int     @id @default(autoincrement())
   name           String
+  slug           String  @unique
   registrationNo String?
   description    String?
   address        String
-  users          User[]
+  city           String?
+  country        String  @default("BD")
+  logoUrl        String?
+  createdById    Int
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  createdBy User   @relation("CommunityCreator", fields: [createdById], references: [id])
+  users     User[]
+
+  @@index([createdById])
+}
+
+// ─────────────────────────────────────────────
+// PLANS & VERSIONING
+// ─────────────────────────────────────────────
+
+model Plan {
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        PlanType @unique
+  description String?
+  isPublic    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  planVersions PlanVersion[]
+}
+
+model PlanVersion {
+  id              Int             @id @default(autoincrement())
+  planId          Int
+  versionNumber   Int
+  price           Decimal         @db.Decimal(10, 2)
+  currency        Currency        @default(BDT)
+  maxCommunities  Int
+  maxUsers        Int?
+  customReporting Boolean         @default(false)
+  apiAccess       Boolean         @default(false)
+  supportLevel    String?
+  billingInterval BillingInterval
+  trialDays       Int             @default(0)
+  isActive        Boolean         @default(true)
+  effectiveFrom   DateTime
+  effectiveTo     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  plan                      Plan                  @relation(fields: [planId], references: [id])
+  subscriptions             Subscription[]
+  invoices                  Invoice[]
+  fromSubscriptionHistories SubscriptionHistory[] @relation("FromVersion")
+  toSubscriptionHistories   SubscriptionHistory[] @relation("ToVersion")
+
+  @@unique([planId, versionNumber])
+  @@index([planId, isActive])
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION
+// ─────────────────────────────────────────────
+
+model Subscription {
+  id                 Int                @id @default(autoincrement())
+  userId             Int
+  planVersionId      Int
+  status             SubscriptionStatus @default(PENDING)
+  billingInterval    BillingInterval
+  startDate          DateTime
+  endDate            DateTime?
+  trialStartDate     DateTime?
+  trialEndDate       DateTime?
+  cancelledAt        DateTime?
+  cancellationNote   String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  renewalAttempts    Int                @default(0)
+  lastRenewalAt      DateTime?
+  nextBillingDate    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planVersion           PlanVersion           @relation(fields: [planVersionId], references: [id])
+  invoices              Invoice[]
+  payments              Payment[]
+  subscriptionHistories SubscriptionHistory[]
+
+  @@index([userId, status])
+  @@index([nextBillingDate])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// INVOICE
+// ─────────────────────────────────────────────
+
+model Invoice {
+  id              Int             @id @default(autoincrement())
+  subscriptionId  Int
+  planVersionId   Int
+  invoiceNumber   String          @unique
+  status          InvoiceStatus   @default(DRAFT)
+  billingInterval BillingInterval
+  currency        Currency        @default(BDT)
+
+  subtotal Decimal  @db.Decimal(10, 2)
+  discount Decimal? @db.Decimal(10, 2)
+  tax      Decimal? @db.Decimal(10, 2)
+  total    Decimal  @db.Decimal(10, 2)
+
+  periodStart DateTime
+  periodEnd   DateTime
+  dueDate     DateTime?
+  paidAt      DateTime?
+  voidedAt    DateTime?
+  voidReason  String?
+
+  notes    String?
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  planVersion  PlanVersion  @relation(fields: [planVersionId], references: [id])
+  payments     Payment[]
+
+  @@index([subscriptionId, status])
+  @@index([dueDate])
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT
+// ─────────────────────────────────────────────
+
+model Payment {
+  id             Int           @id @default(autoincrement())
+  subscriptionId Int
+  invoiceId      Int?
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       Currency      @default(BDT)
+  paymentMethod  PaymentMethod
+  status         PaymentStatus
+
+  transactionId   String @unique
+  idempotencyKey  String @unique
+  gatewayResponse Json?
+
+  paidAt         DateTime?
+  failureReason  String?
+  refundedAt     DateTime?
+  refundReason   String?
+  refundedAmount Decimal?  @db.Decimal(10, 2)
+
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  invoice      Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([subscriptionId])
+  @@index([invoiceId])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────────
+// SUBSCRIPTION HISTORY
+// ─────────────────────────────────────────────
+model SubscriptionHistory {
+  id                Int                      @id @default(autoincrement())
+  subscriptionId    Int
+  fromStatus        SubscriptionStatus?
+  toStatus          SubscriptionStatus
+  fromPlanVersionId Int?
+  toPlanVersionId   Int?
+  changeReason      SubscriptionChangeReason
+  note              String?
+  proratedAmount    Decimal?                 @db.Decimal(10, 2)
+  effectiveDate     DateTime
+
+  createdAt       DateTime     @default(now())
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+  fromPlanVersion PlanVersion? @relation("FromVersion", fields: [fromPlanVersionId], references: [id])
+  toPlanVersion   PlanVersion? @relation("ToVersion", fields: [toPlanVersionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOG
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id        Int         @id @default(autoincrement())
+  userId    Int?
+  action    AuditAction
+  entity    String
+  entityId  Int?
+  oldValue  Json?
+  newValue  Json?
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([createdAt])
 }
