@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -8,7 +8,71 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  SUPER_ADMIN
+  COMMUNITY_ADMIN
+  PROPERTY_ADMIN
+  FLAT_OWNER
+  TENANT
+  SERVICE_PROVIDER
+}
+
+enum OTPType {
+  EMAIL_VERIFICATION
+  PHONE_VERIFICATION
+  EMAIL_CHANGE
+  PHONE_CHANGE
+  PASSWORD_RESET
+  TWO_FACTOR
+}
+
 model User {
-  id      Int     @id @default(autoincrement())
-  email   String  @unique
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  firstName       String
+  lastName        String?
+  role            UserRole
+  passwordHash    String
+  emailVerifiedAt DateTime?
+  avatarUrl       String?
+  communityId     Int?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  otps      OTP[]
+  community Community? @relation(fields: [communityId], references: [id])
+}
+
+model OTP {
+  id         Int      @id @default(autoincrement())
+  identifier String
+  code       String
+  type       OTPType
+  userId     Int?
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  attempts   Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Community {
+  id Int @id @default(autoincrement())
+
+  name           String
+  registrationNo String?
+  description    String?
+  address        String
+  users          User[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
