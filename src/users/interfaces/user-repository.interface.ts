@@ -1,9 +1,17 @@
-import { User } from "src/generated/prisma/client";
+import { User, UserRole } from "src/generated/prisma/client";
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');
 
 export interface CreateUserInput {
     email: string;
+    phone?: string;
+    firstName: string;
+    lastName?: string;
+    role: UserRole;
+    passwordHash: string;
+    avatarUrl?: string;
+    communityId?: number;
+
 }
 
 export interface IUserRepository {
