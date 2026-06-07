@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsEmail, IsEnum, isNotEmpty, IsOptional, IsPhoneNumber, IsString, isString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { UserRole } from "src/generated/prisma/enums";
 
 export class RegisterDto {
@@ -26,6 +26,10 @@ export class RegisterDto {
 
     @IsEnum(UserRole)
     role: UserRole;
+
+    @IsString()
+    @IsOptional()
+    avatarUrl?: string;
 
     @IsString()
     @MinLength(6)
