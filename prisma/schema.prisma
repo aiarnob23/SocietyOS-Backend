@@ -92,6 +92,8 @@ enum AuditAction {
 
 enum SubscriptionChangeReason {
   NEW_SUBSCRIPTION
+  PAYMENT_FAILED
+  PAYMENT_SUCCEEDED
   UPGRADED
   DOWNGRADED
   RENEWED
