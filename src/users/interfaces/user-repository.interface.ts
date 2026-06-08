@@ -11,6 +11,7 @@ export interface CreateUserInput {
     passwordHash: string;
     avatarUrl?: string;
     communityId?: number;
+    emailVerifiedAt?: Date | null;
 
 }
 

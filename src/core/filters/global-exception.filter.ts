@@ -1,4 +1,3 @@
-// common/filters/global-exception.filter.ts
 import {
   ArgumentsHost,
   Catch,
@@ -16,7 +15,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    // Custom exception
+    // Custom AppException
     if (exception instanceof AppException) {
       return response.status(exception.statusCode).json({
         success: false,
@@ -27,22 +26,30 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       });
     }
 
-    // NestJS built-in exception
+    // NestJS built-in HttpException 
     if (exception instanceof HttpException) {
+      const exceptionResponse = exception.getResponse();
+      const message =
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : (exceptionResponse as any).message ?? exception.message;
+
       return response.status(exception.getStatus()).json({
         success: false,
         code: 'HTTP_EXCEPTION',
-        message: exception.message,
+        message,
         path: request.url,
         timestamp: new Date().toISOString(),
       });
     }
 
     // Unexpected error
+    const isDev = process.env.NODE_ENV === 'development';
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
+      ...(isDev && { debug: (exception as Error)?.message }),
       path: request.url,
       timestamp: new Date().toISOString(),
     });

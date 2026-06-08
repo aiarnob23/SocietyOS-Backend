@@ -13,8 +13,8 @@ export class AuthService {
         private readonly usersService: UsersService,
     ) { }
 
-    //Register a new user
-    async register(dto: RegisterDto): Promise<User> {
+    //Register a new user 
+    async register(dto: RegisterDto) {
         //Check if email already exists
         const existingUser = await this.usersService.findByEmail(dto.email);
         if (existingUser) {
@@ -25,6 +25,7 @@ export class AuthService {
         }
         //hash password
         const hashedPassword = await this.hashPassword(dto.password);
+        //create user
         const user = await this.usersService.createUser({
             email: dto.email,
             phone: dto.phone,
@@ -33,9 +34,20 @@ export class AuthService {
             role: dto.role,
             passwordHash: hashedPassword,
             avatarUrl: dto.avatarUrl,
-            communityId: dto.communityId
+            communityId: dto.communityId,
+            emailVerifiedAt: null,
         });
-        return user;
+
+        //send otp for email and phone verification
+
+        //return response
+        return {
+            message: 'User created successfully',
+            data:{
+                userId: user.id,
+                requiredVerification: true,
+            }
+        }
     }
 
     private async hashPassword(password: string): Promise<string> {
