@@ -83,10 +83,7 @@ export class AuthService {
                 userId: existingUser.id,
             }
         }
-
     }
-
-
 
     private async hashPassword(password: string): Promise<string> {
         return await bcrypt.hash(password, this.SALT_ROUNDS);

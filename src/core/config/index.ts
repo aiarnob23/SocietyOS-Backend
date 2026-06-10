@@ -53,8 +53,9 @@ export const config = {
       max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
     },
     jwt: {
-      secret: process.env.JWT_SECRET,
-      expiresIn: process.env.JWT_EXPIRES_IN || '1d',
+      secret: process.env.JWT_SECRET || 'JWT_FALLBACK_SECRET',
+      acessExpiresIn: process.env.JWT_EXPIRES_IN || '15m',
+      refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       issuer: process.env.JWT_ISSUER || 'ignitor-app',
     },
   },
