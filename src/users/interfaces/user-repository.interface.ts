@@ -7,7 +7,6 @@ export interface CreateUserInput {
     phone?: string;
     firstName: string;
     lastName?: string;
-    role: UserRole;
     passwordHash: string;
     avatarUrl?: string;
     communityId?: number;

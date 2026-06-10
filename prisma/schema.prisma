@@ -118,7 +118,7 @@ model User {
   phone        String?  @unique
   firstName    String
   lastName     String?
-  role         UserRole
+  role         UserRole @default(USER)
   passwordHash String
 
   emailVerifiedAt DateTime?

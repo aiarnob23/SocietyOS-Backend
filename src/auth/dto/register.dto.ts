@@ -24,9 +24,6 @@ export class RegisterDto {
     @MaxLength(50)
     lastName?: string;
 
-    @IsEnum(UserRole)
-    role: UserRole;
-
     @IsString()
     @IsOptional()
     avatarUrl?: string;
