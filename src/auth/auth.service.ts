@@ -7,12 +7,14 @@ import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class AuthService {
-    private readonly SALT_ROUNDS = 12;
+    private readonly SALT_ROUNDS = 10;
     constructor(
         private readonly usersService: UsersService,
+        private readonly tokenService: TokenService,
     ) { }
 
     //Register a new user 
@@ -77,10 +79,15 @@ export class AuthService {
             )
         }
 
+        //create access and refresh tokens
+        const { accessToken, refreshToken } = this.tokenService.generateToken(existingUser.email, existingUser.role);
+
         return {
             message: 'User logged in successfully',
             data: {
                 userId: existingUser.id,
+                accessToken,
+                refreshToken
             }
         }
     }

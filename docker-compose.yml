@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    environment:
+      - UV_THREADPOOL_SIZE=32
     env_file:
       - .env
     ports:
