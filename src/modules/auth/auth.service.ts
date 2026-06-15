@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { ConflictException } from 'src/core/exceptions/conflict.exceptions';
 import { ErrorCodes } from 'src/core/exceptions/error-codes';
