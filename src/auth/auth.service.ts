@@ -8,6 +8,8 @@ import { LoginDto } from './dto/login.dto';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
 import { TokenService } from './token.service';
+import { SessionService } from './session.service';
+import { config } from 'src/core/config';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,7 @@ export class AuthService {
     constructor(
         private readonly usersService: UsersService,
         private readonly tokenService: TokenService,
+        private readonly sessionService: SessionService,
     ) { }
 
     //Register a new user 
@@ -53,8 +56,10 @@ export class AuthService {
         }
     }
 
-    //Login
-    async login(dto: LoginDto) {
+    //
+    //-------------Login------------
+    //
+    async login(dto: LoginDto, meta?: { userAgent?: string, ipAddress?: string }) {
         //Check if user exists
         const existingUser = await this.usersService.findByEmail(dto.email);
         if (!existingUser) {
@@ -82,6 +87,13 @@ export class AuthService {
         //create access and refresh tokens
         const { accessToken, refreshToken } = this.tokenService.generateToken(existingUser.email, existingUser.role);
 
+        //create session
+        await this.sessionService.createSession(existingUser.id, refreshToken, {
+            userAgent: meta?.userAgent,
+            ipAddress: meta?.ipAddress,
+            expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
+        });
+
         return {
             message: 'User logged in successfully',
             data: {
@@ -92,10 +104,16 @@ export class AuthService {
         }
     }
 
+    //
+    //-------------Hash Password------------
+    //
     private async hashPassword(password: string): Promise<string> {
         return await bcrypt.hash(password, this.SALT_ROUNDS);
     }
 
+    //
+    //-------------Verify Password------------
+    //
     private async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
         return await bcrypt.compare(plainPassword, hashedPassword);
     }
