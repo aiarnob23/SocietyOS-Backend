@@ -125,7 +125,9 @@ export class AuthService {
             )
         }
         //create access token
-        const { accessToken , refreshToken } = this.tokenService.generateToken(paylod.userId, paylod.email, paylod.role);
+        const { accessToken, refreshToken } = this.tokenService.generateToken(paylod.userId, paylod.email, paylod.role);
+        //rotate refresh token
+        await this.sessionService.rotateRefreshToken(session.id, refreshToken);
         return {
             message: 'Token refreshed successfully',
             data: {

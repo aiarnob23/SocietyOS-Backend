@@ -36,6 +36,12 @@ export class SessionService {
         return null;
     }
 
+    //rotate refresh token
+    async rotateRefreshToken(sessionId: number, refreshToken: string) {
+        const refreshTokenHash = await this.EncryptionService.hash(refreshToken);
+        return this.sessionRepository.rotateRefreshToken(sessionId, refreshTokenHash);
+    }
+
     //revoke session
     async revokeSession(sessionId: number) {
         return this.sessionRepository.revokeSession(sessionId);

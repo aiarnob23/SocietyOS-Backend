@@ -29,5 +29,13 @@ export class PrismaSessionRepository implements ISessionRepository {
         });
     }
 
+    async rotateRefreshToken(sessionId: number, refreshTokenHash: string): Promise<UserSession> {
+        return this.prisma.userSession.update({
+            where: {
+                id: sessionId,
+            },
+            data: { refreshTokenHash },
+        });
+    }
 
 }
