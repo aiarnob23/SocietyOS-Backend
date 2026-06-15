@@ -15,7 +15,7 @@ export class SessionService {
     async createSession(
         userId: number,
         refreshToken: string,
-        meta?: { userAgent?: string, ipAddress?: string, expiresAt?: Date, },
+        meta?: { userAgent?: string, ipAddress?: string, expiresAt?: Date},
     ) {
         const refreshTokenHash = await bcrypt.hash(refreshToken, this.SALT_ROUNDS);
 

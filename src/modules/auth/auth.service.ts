@@ -10,6 +10,7 @@ import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptio
 import { TokenService } from './token.service';
 import { config } from 'src/core/config';
 import { SessionService } from '../sessions/sessions.service';
+import { RequestContext } from 'src/core/context/request/request-context';
 
 @Injectable()
 export class AuthService {
@@ -59,7 +60,7 @@ export class AuthService {
     //
     //-------------Login------------
     //
-    async login(dto: LoginDto, meta?: { userAgent?: string, ipAddress?: string }) {
+    async login(dto: LoginDto) {
         //Check if user exists
         const existingUser = await this.usersService.findByEmail(dto.email);
         if (!existingUser) {
@@ -88,10 +89,16 @@ export class AuthService {
         const { accessToken, refreshToken } = this.tokenService.generateToken(existingUser.email, existingUser.role);
 
         //create session
-        await this.sessionService.createSession(existingUser.id, refreshToken, {
-            ...meta,
-            expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
-        });
+        const ctx = RequestContext.get();
+        await this.sessionService.createSession(
+            existingUser.id,
+            refreshToken,
+            {
+                ipAddress: ctx?.ipAddress,
+                userAgent: ctx?.userAgent,
+                expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
+            }
+        );
 
         return {
             message: 'User logged in successfully',
