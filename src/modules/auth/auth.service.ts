@@ -3,7 +3,6 @@ import { UsersService } from 'src/modules/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { ConflictException } from 'src/core/exceptions/conflict.exceptions';
 import { ErrorCodes } from 'src/core/exceptions/error-codes';
-import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
@@ -11,12 +10,13 @@ import { TokenService } from './token.service';
 import { config } from 'src/core/config';
 import { SessionService } from '../sessions/sessions.service';
 import { RequestContext } from 'src/core/context/request/request-context';
+import { EncryptionService } from 'src/core/security/encryption/encryption.service';
 
 @Injectable()
 export class AuthService {
-    private readonly SALT_ROUNDS = 10;
     constructor(
         private readonly usersService: UsersService,
+        private readonly encryptionService: EncryptionService,
         private readonly tokenService: TokenService,
         private readonly sessionService: SessionService,
     ) { }
@@ -114,13 +114,13 @@ export class AuthService {
     //-------------Hash Password------------
     //
     private async hashPassword(password: string): Promise<string> {
-        return await bcrypt.hash(password, this.SALT_ROUNDS);
+        return await this.encryptionService.hash(password);
     }
 
     //
     //-------------Verify Password------------
     //
     private async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
-        return await bcrypt.compare(plainPassword, hashedPassword);
+        return await this.encryptionService.verify(hashedPassword, plainPassword);
     }
 }

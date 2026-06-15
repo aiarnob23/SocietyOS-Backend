@@ -1,14 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PrismaService } from "src/database/prisma/prisma.service";
-import * as bcrypt from 'bcrypt';
 import { ISessionRepository, SESSION_REPOSITORY } from "./interfaces/session-repository.interface";
-
+import { EncryptionService } from "src/core/security/encryption/encryption.service";
 @Injectable()
 export class SessionService {
     private readonly SALT_ROUNDS = 8;
     constructor(
         @Inject(SESSION_REPOSITORY)
         private readonly sessionRepository: ISessionRepository,
+        private readonly EncryptionService: EncryptionService,
     ) { }
 
     // Create a new session
@@ -17,7 +16,7 @@ export class SessionService {
         refreshToken: string,
         meta?: { userAgent?: string, ipAddress?: string, expiresAt?: Date},
     ) {
-        const refreshTokenHash = await bcrypt.hash(refreshToken, this.SALT_ROUNDS);
+        const refreshTokenHash = await this.EncryptionService.hash(refreshToken);
 
         return this.sessionRepository.createSession({
             userId,
@@ -31,7 +30,7 @@ export class SessionService {
     async findValidSession(userId: number, refreshToken: string) {
         const sessions = await this.sessionRepository.findValidSession(userId);
         for (const session of sessions) {
-            const isMatch = await bcrypt.compare(refreshToken, session.refreshTokenHash);
+            const isMatch = await this.EncryptionService.verify(session.refreshTokenHash, refreshToken);
             if (isMatch) return session;
         }
         return null;

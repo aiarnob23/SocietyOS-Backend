@@ -5,10 +5,12 @@ import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { SessionsModule } from '../sessions/sessions.module';
+import { EncryptionModule } from 'src/core/security/encryption/encryption.module';
 
 @Module({
     imports: [
         UsersModule,
+        EncryptionModule,
         JwtModule.register({}),
         SessionsModule,
     ],
