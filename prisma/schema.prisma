@@ -142,6 +142,9 @@ model User {
   otps               OTP[]
   subscriptions      Subscription[]
   auditLogs          AuditLog[]
+
+  @@index([email, phone])
+  @@index([communityId])
 }
 
 model UserSession {

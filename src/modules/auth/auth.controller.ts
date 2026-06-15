@@ -1,9 +1,20 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { LoginDto } from './dto/login.dto';
 import { config } from 'src/core/config';
+import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
+import { ErrorCodes } from 'src/core/exceptions/error-codes';
+import { AuthTokenResponse } from './types/auth-token-response.type';
+
+const REFRESH_COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict' as const,
+    maxAge: Number(config.security.jwt.refreshExpiresIn) * 1000,
+    path: '/',
+}
 
 @Controller('auth')
 export class AuthController {
@@ -23,25 +34,51 @@ export class AuthController {
         @Body() dto: LoginDto,
         @Res({ passthrough: true }) res: Response,
     ) {
-        const result = this.authService.login(dto);
+        const result = await this.authService.login(dto);
+        this.setRefreshCookie(res, result.data.refreshToken);
+        return this.buildTokenResponse(result);
+    }
 
-        res.cookie('refreshToken', (await result).data.refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'strict',
-            maxAge: Number(config.security.jwt.refreshExpiresIn) * 1000,
-            path: '/auth/refresh',
-        });
+    //Refresh token
+    @Post('refresh-token')
+    @HttpCode(HttpStatus.OK)
+    async refresh(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const refreshToken = req.cookies?.['refreshToken'];
+        console.log(req.cookies?.['refreshToken']);
+        if (!refreshToken) {
+            throw new UnauthorizedException(
+                ErrorCodes.INVALID_TOKEN,
+                'Refresh token is invalid or expired',
+            )
+        }
+        const result = await this.authService.refresh(refreshToken);
+        this.setRefreshCookie(res, result.data.refreshToken);
+        return this.buildTokenResponse(result);
+    }
 
+    //Set Refresh cookie
+    private setRefreshCookie(res: Response, refreshToken: string): void {
+        res.cookie(
+            'refreshToken',
+            refreshToken,
+            REFRESH_COOKIE_OPTIONS
+        );
+    }
+
+    //Token response
+    private buildTokenResponse(result: AuthTokenResponse) {
         return {
-            message: (await result).message,
+            message: result.message,
             data: {
-                userId: (await result).data.userId,
-                accessToken: (await result).data.accessToken,
+                userId: result.data.userId,
+                accessToken: result.data.accessToken,
             }
         }
-
     }
+
 
 
 }

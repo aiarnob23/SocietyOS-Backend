@@ -21,7 +21,7 @@ export class AuthService {
         private readonly sessionService: SessionService,
     ) { }
 
-    //Register a new user 
+    //  REGISTER
     async register(dto: RegisterDto) {
         //Check if email already exists
         const existingUser = await this.usersService.findByEmail(dto.email);
@@ -57,9 +57,7 @@ export class AuthService {
         }
     }
 
-    //
-    //-------------Login------------
-    //
+    //  LOGIN
     async login(dto: LoginDto) {
         //Check if user exists
         const existingUser = await this.usersService.findByEmail(dto.email);
@@ -84,10 +82,8 @@ export class AuthService {
                 'Invalid Email or Password',
             )
         }
-
         //create access and refresh tokens
-        const { accessToken, refreshToken } = this.tokenService.generateToken(existingUser.email, existingUser.role);
-
+        const { accessToken, refreshToken } = this.tokenService.generateToken(existingUser.id, existingUser.email, existingUser.role);
         //create session
         const ctx = RequestContext.get();
         await this.sessionService.createSession(
@@ -99,7 +95,6 @@ export class AuthService {
                 expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
             }
         );
-
         return {
             message: 'User logged in successfully',
             data: {
@@ -110,16 +105,43 @@ export class AuthService {
         }
     }
 
-    //
-    //-------------Hash Password------------
-    //
+    // REFRESH TOKEN
+    async refresh(refreshTokenFromCookie: string) {
+        const paylod = this.tokenService.verifyRefreshToken(refreshTokenFromCookie);
+        //check if user exists
+        const user = await this.usersService.findByEmail(paylod.email);
+        if (!user) {
+            throw new UnauthorizedException(
+                ErrorCodes.INVALID_TOKEN,
+                'Refresh token is invalid or expired',
+            )
+        }
+        //check if session exists
+        const session = await this.sessionService.findValidSession(paylod.userId, refreshTokenFromCookie);
+        if (!session) {
+            throw new UnauthorizedException(
+                ErrorCodes.INVALID_TOKEN,
+                'Refresh token is invalid or expired',
+            )
+        }
+        //create access token
+        const { accessToken , refreshToken } = this.tokenService.generateToken(paylod.userId, paylod.email, paylod.role);
+        return {
+            message: 'Token refreshed successfully',
+            data: {
+                userId: user.id,
+                accessToken,
+                refreshToken
+            }
+        }
+    }
+
+    // HASH PASSWORD
     private async hashPassword(password: string): Promise<string> {
         return await this.encryptionService.hash(password);
     }
 
-    //
-    //-------------Verify Password------------
-    //
+    // VERIFY PASSWORD
     private async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
         return await this.encryptionService.verify(hashedPassword, plainPassword);
     }

@@ -5,6 +5,7 @@ import { ErrorCodes } from "src/core/exceptions/error-codes";
 import { UnauthorizedException } from "src/core/exceptions/unauthorized.exceptions";
 
 export interface JwtPayload {
+    userId: number,
     email: string,
     role: string
 }
@@ -20,8 +21,8 @@ export class TokenService {
         private readonly jwtService: JwtService,
     ) { }
 
-    generateToken(email: string, role: string): TokenPayload {
-        const payload = { email, role };
+    generateToken(userId: number, email: string, role: string): TokenPayload {
+        const payload = { userId,email, role };
         const accessToken = this.jwtService.sign(payload, {
             secret: config.security.jwt.secret,
             expiresIn: config.security.jwt.acessExpiresIn as any,
