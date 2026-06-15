@@ -8,8 +8,8 @@ import { LoginDto } from './dto/login.dto';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
 import { TokenService } from './token.service';
-import { SessionService } from './session.service';
 import { config } from 'src/core/config';
+import { SessionService } from '../sessions/sessions.service';
 
 @Injectable()
 export class AuthService {
@@ -89,8 +89,7 @@ export class AuthService {
 
         //create session
         await this.sessionService.createSession(existingUser.id, refreshToken, {
-            userAgent: meta?.userAgent,
-            ipAddress: meta?.ipAddress,
+            ...meta,
             expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
         });
 

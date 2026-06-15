@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
 import { LoginDto } from './dto/login.dto';
+import { config } from 'src/core/config';
 
 @Controller('auth')
 export class AuthController {
@@ -28,7 +29,7 @@ export class AuthController {
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: Number(config.security.jwt.refreshExpiresIn) * 1000,
             path: '/auth/refresh',
         });
 
