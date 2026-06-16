@@ -11,10 +11,12 @@ import { config } from 'src/core/config';
 import { SessionService } from '../sessions/sessions.service';
 import { RequestContext } from 'src/core/context/request/request-context';
 import { EncryptionService } from 'src/core/security/encryption/encryption.service';
+import { AppLogger } from 'src/core/logging/logger.service';
 
 @Injectable()
 export class AuthService {
     constructor(
+        private readonly logger: AppLogger,
         private readonly usersService: UsersService,
         private readonly encryptionService: EncryptionService,
         private readonly tokenService: TokenService,
@@ -59,6 +61,7 @@ export class AuthService {
 
     //  LOGIN
     async login(dto: LoginDto) {
+        this.logger.info('Login attempt', {email: dto.email});
         //Check if user exists
         const existingUser = await this.usersService.findByEmail(dto.email);
         if (!existingUser) {
