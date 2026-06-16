@@ -8,6 +8,30 @@ export class PrismaSessionRepository implements ISessionRepository {
     constructor(private readonly prisma: PrismaService) { }
 
     createSession(data: ICreateSessionInput): Promise<UserSession> {
+        return this.upsertByUserId(data);
+    }
+
+    async upsertByUserId(data: ICreateSessionInput): Promise<UserSession> {
+        const existingSession = await this.prisma.userSession.findFirst({
+            where: {
+                userId: data.userId,
+                userAgent: data.userAgent,
+                isRevoked: false,
+            },
+        });
+        if (existingSession) {
+            return this.prisma.userSession.update({
+                where: {
+                    id: existingSession.id,
+                },
+                data: {
+                    refreshTokenHash: data.refreshTokenHash,
+                    lastLoginAt: new Date(),
+                    expiresAt: data.expiresAt,
+                    isRevoked: false,
+                }
+            })
+        }
         return this.prisma.userSession.create({ data });
     }
 
