@@ -41,14 +41,10 @@ export class TokenService {
 
     verifyAccessToken(token: string): JwtPayload {
         try {
-            console.log(token);
-            const payload = this.jwtService.verify(token, {
+            return this.jwtService.verify(token, {
                 secret: config.security.jwt.secret,
             });
-            console.log(payload);
-            return payload;
-        } catch(error) {
-            console.log(error);
+        } catch (error) {
             throw new UnauthorizedException(
                 ErrorCodes.INVALID_TOKEN,
                 'Access token is invalid or expired',

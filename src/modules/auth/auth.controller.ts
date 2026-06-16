@@ -52,7 +52,6 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response,
     ) {
         const refreshToken = req.cookies?.['refreshToken'];
-        console.log(req.cookies?.['refreshToken']);
         if (!refreshToken) {
             throw new UnauthorizedException(
                 ErrorCodes.INVALID_TOKEN,

@@ -17,4 +17,6 @@ export interface CreateUserInput {
 export interface IUserRepository {
     create(data: CreateUserInput): Promise<User>;
     findByEmail(email: string): Promise<User | null>;
+    getSelfProfileById(id: number): Promise<any>;
+    getUserById(id: number): Promise<any>;
 }
