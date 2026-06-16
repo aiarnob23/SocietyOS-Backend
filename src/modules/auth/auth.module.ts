@@ -14,10 +14,15 @@ import { EncryptionModule } from 'src/core/security/encryption/encryption.module
         JwtModule.register({}),
         SessionsModule,
     ],
-    controllers: [AuthController],
+    controllers: [
+        AuthController
+    ],
     providers: [
         AuthService,
         TokenService,
     ],
+    exports: [
+        TokenService,
+    ]
 })
-export class AuthModule {}
+export class AuthModule { }

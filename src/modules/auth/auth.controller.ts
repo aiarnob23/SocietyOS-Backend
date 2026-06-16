@@ -7,6 +7,8 @@ import { config } from 'src/core/config';
 import { UnauthorizedException } from 'src/core/exceptions/unauthorized.exceptions';
 import { ErrorCodes } from 'src/core/exceptions/error-codes';
 import { AuthTokenResponse } from './types/auth-token-response.type';
+import { Public } from 'src/core/decorators/public.decorator';
+import { Roles } from 'src/core/decorators/roles.decorator';
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -21,6 +23,7 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     //Register
+    @Public()
     @Post('register')
     @HttpCode(HttpStatus.CREATED)
     register(@Body() dto: RegisterDto) {
@@ -28,6 +31,7 @@ export class AuthController {
     }
 
     //Login
+    @Public()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(
@@ -40,6 +44,7 @@ export class AuthController {
     }
 
     //Refresh token
+    @Public()
     @Post('refresh-token')
     @HttpCode(HttpStatus.OK)
     async refresh(

@@ -54,8 +54,8 @@ export const config = {
     },
     jwt: {
       secret: process.env.JWT_SECRET || 'JWT_FALLBACK_SECRET',
-      acessExpiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN ?? '900',
-      refreshExpiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN ?? '604800',
+      acessExpiresIn: Number(process.env.JWT_ACCESS_TOKEN_EXPIRES_IN ?? 900),
+      refreshExpiresIn: Number(process.env.JWT_REFRESH_TOKEN_EXPIRES_IN ?? 604800),
       issuer: process.env.JWT_ISSUER || 'ignitor-app',
     },
   },

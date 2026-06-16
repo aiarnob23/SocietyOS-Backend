@@ -7,6 +7,10 @@ export const ErrorCodes = {
   EMAIL_NOT_VERIFIED:   'EMAIL_NOT_VERIFIED',
   INVALID_TOKEN: 'INVALID_TOKEN',
 
+  //Authorization
+  FORBIDDEN: 'FORBIDDEN',
+  
+
   // User
   USER_NOT_FOUND: 'USER_NOT_FOUND',
 
