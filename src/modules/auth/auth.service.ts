@@ -61,7 +61,7 @@ export class AuthService {
 
     //  LOGIN
     async login(dto: LoginDto) {
-        this.logger.info('Login attempt', {email: dto.email});
+        this.logger.info('Login attempt', { email: dto.email });
         //Check if user exists
         const existingUser = await this.usersService.findByEmail(dto.email);
         if (!existingUser) {
@@ -138,6 +138,22 @@ export class AuthService {
                 accessToken,
                 refreshToken
             }
+        }
+    }
+
+    // LOGOUT
+    async logout(refreshToken: string) {
+        try {
+            const payload = this.tokenService.verifyRefreshToken(refreshToken);
+            if (payload) {
+                const session = await this.sessionService.findValidSession(payload.userId, refreshToken);
+                if (session) {
+                    await this.sessionService.revokeSession(session.id);
+                    this.logger.info('Session revoked (user logged out) successfully', { userId: payload.userId, sessionId: session.id });
+                }
+            }
+        } catch {
+
         }
     }
 
