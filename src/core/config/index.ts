@@ -22,6 +22,11 @@ export const config = {
       max: parseInt(process.env.DB_POOL_MAX || '10'),
     },
   },
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    password: process.env.REDIS_PASSWORD,
+  },
 
   aws: {
     region: process.env.AWS_REGION,

@@ -9,9 +9,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { RolesGuard } from './core/guards/roles.guard';
 import { AppLoggerModule } from './core/logging/logger.module';
+import { RedisModule } from './core/redis/redis.module';
 
 @Module({
-  imports: [AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule],
+  imports: [RedisModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule],
   controllers: [AppController],
   providers: [
     AppService,

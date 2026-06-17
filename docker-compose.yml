@@ -14,8 +14,8 @@ services:
       - /app/node_modules
     depends_on:
       - postgres-db
+      - redis-db
     #   - mongo-db
-    #   - redis-db
     networks:
       - societyos-network
     profiles:
@@ -42,8 +42,26 @@ services:
     profiles:
       - dev
 
+  redis-db:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - societyos-network
+    profiles:
+      - dev
+
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   societyos-network:
