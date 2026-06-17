@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { ConflictException } from 'src/core/exceptions/conflict.exceptions';
@@ -12,10 +12,13 @@ import { SessionService } from '../sessions/sessions.service';
 import { RequestContext } from 'src/core/context/request/request-context';
 import { EncryptionService } from 'src/core/security/encryption/encryption.service';
 import { AppLogger } from 'src/core/logging/logger.service';
+import { REDIS_CLIENT } from 'src/core/redis/redis.constant';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
     constructor(
+        @Inject(REDIS_CLIENT) private readonly redis: Redis,
         private readonly logger: AppLogger,
         private readonly usersService: UsersService,
         private readonly encryptionService: EncryptionService,
@@ -142,18 +145,30 @@ export class AuthService {
     }
 
     // LOGOUT
-    async logout(refreshToken: string) {
+    async logout(refreshToken: string, accessToken: string) {
         try {
             const payload = this.tokenService.verifyRefreshToken(refreshToken);
+            this.logger.info('Logout attempt', { userId: payload.userId });
             if (payload) {
                 const session = await this.sessionService.findValidSession(payload.userId, refreshToken);
                 if (session) {
                     await this.sessionService.revokeSession(session.id);
-                    this.logger.info('Session revoked (user logged out) successfully', { userId: payload.userId, sessionId: session.id });
+                    this.logger.info('Session revoked successfully', { userId: payload.userId, sessionId: session.id });
                 }
             }
-        } catch {
-
+            if (accessToken) {
+                await this.redis.setex(
+                    `blacklist-token:${accessToken}`,
+                    config.security.jwt.acessExpiresIn,
+                    '1',
+                );
+            }
+            this.logger.info('Logout successfully', { userId: payload.userId });
+            return {
+                message: 'Logout successfully'
+            }
+        } catch (error) {
+            this.logger.error('Error revoking session', error as string);
         }
     }
 

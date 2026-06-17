@@ -72,8 +72,9 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response
     ) {
         const refreshToken = req.cookies?.['refreshToken'];
-        if (refreshToken) {
-            await this.authService.logout(refreshToken);
+        const accessToken = req.headers['authorization']?.split(' ')[1];
+        if (refreshToken || accessToken) {
+            await this.authService.logout(refreshToken ?? '', accessToken ?? '');
         }
         res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
         return {
