@@ -10,9 +10,10 @@ import { JwtAuthGuard } from './core/guards/jwt-auth.guard';
 import { RolesGuard } from './core/guards/roles.guard';
 import { AppLoggerModule } from './core/logging/logger.module';
 import { RedisModule } from './core/redis/redis.module';
+import { BullMQModule } from './core/queues/bullmq.module';
 
 @Module({
-  imports: [RedisModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule],
   controllers: [AppController],
   providers: [
     AppService,

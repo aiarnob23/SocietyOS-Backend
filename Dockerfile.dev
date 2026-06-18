@@ -1,5 +1,9 @@
 FROM node:22-alpine AS development
 
+RUN apk add --no-cache tzdata
+
+ENV TZ=Asia/Dhaka
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -13,5 +17,3 @@ RUN npx prisma generate
 EXPOSE 3000
 
 CMD ["npm", "run", "start:dev"]
-
-# docker compose exec api npm install

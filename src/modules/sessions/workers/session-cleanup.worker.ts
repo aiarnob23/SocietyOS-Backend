@@ -27,20 +27,17 @@ export class SessionCleanupWorker implements OnModuleInit, OnModuleDestroy {
 
     //register repeatable jobs
     private async registerRepeatableJobs() {
-        const schedulers = await this.sessionQueue.getJobSchedulers();
-        for (const scheduler of schedulers) {
-            if (scheduler.name === SESSION_JOBS.CLEANUP) {
-                await this.sessionQueue.removeJobScheduler(scheduler.id as string);
-            }
-        }
-        await this.sessionQueue.add(
+        await this.sessionQueue.upsertJobScheduler(
             SESSION_JOBS.CLEANUP,
-            {},
             {
-                repeat: { pattern: '0 0 0 * * *' },
-                jobId: 'session-cleanup',
+                pattern: '0 0 0 * * *',
             },
-        )
+            {
+                name: SESSION_JOBS.CLEANUP,
+                data: {},
+            },
+        );
+        this.logger.info(`[SessionCleanup] Job registered successfully`);
     }
     //start worker fn
     private startWorker() {
