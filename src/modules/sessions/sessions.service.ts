@@ -46,4 +46,9 @@ export class SessionService {
     async revokeSession(sessionId: number) {
         return this.sessionRepository.revokeSession(sessionId);
     }
+
+    //delete revoked and expired sessions
+    async deleteExpiredAndRevokedSessions() {
+        return this.sessionRepository.deleteExpiredAndRevokedSessions();
+    }
 }

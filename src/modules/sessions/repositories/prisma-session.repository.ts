@@ -62,4 +62,16 @@ export class PrismaSessionRepository implements ISessionRepository {
         });
     }
 
+    async deleteExpiredAndRevokedSessions(): Promise<number> {
+        const result = await this.prisma.userSession.deleteMany({
+            where: {
+                OR: [
+                    { expiresAt: { lte: new Date() } },
+                    { isRevoked: true },
+                ]
+            }
+        });
+        return result.count;
+    }
+
 }

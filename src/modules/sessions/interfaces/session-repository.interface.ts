@@ -16,4 +16,5 @@ export interface ISessionRepository {
     findValidSession(userId: number): Promise<UserSession[]>;
     rotateRefreshToken(sessionId: number, refreshTokenHash: string): Promise<UserSession>;
     revokeSession(sessionId: number): Promise<void>;
+    deleteExpiredAndRevokedSessions(): Promise<number>;
 }
