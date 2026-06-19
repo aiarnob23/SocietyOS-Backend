@@ -148,18 +148,19 @@ model User {
 }
 
 model UserSession {
-  id         Int     @id @default(autoincrement())
-  userId     Int
+  id               Int       @id @default(autoincrement())
+  userId           Int
   refreshTokenHash String
-  isRevoked  Boolean   @default(false)
-  lastLoginAt DateTime?
-  userAgent  String?
-  ipAddress  String?
-  expiresAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  isRevoked        Boolean   @default(false)
+  lastLoginAt      DateTime?
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, refreshTokenHash])
   @@index([userId, isRevoked])
 }

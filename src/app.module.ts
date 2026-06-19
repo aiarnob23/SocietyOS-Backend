@@ -12,9 +12,10 @@ import { AppLoggerModule } from './core/logging/logger.module';
 import { RedisModule } from './core/redis/redis.module';
 import { BullMQModule } from './core/queues/bullmq.module';
 import { PlansModule } from './plans/plans.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule],
   controllers: [AppController],
   providers: [
     AppService,
