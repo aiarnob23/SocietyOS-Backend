@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { CreateSbuscriptionInput, CreateSubscriptionHistoryInput, ISubscriptionRepository } from "../ interfaces/subscription-repository.interface";
+import { CreateSbuscriptionInput, CreateSubscriptionHistoryInput, ISubscriptionRepository } from "../interfaces/subscription-repository.interface";
 import { PrismaService } from "src/database/prisma/prisma.service";
 import { Subscription, SubscriptionHistory, SubscriptionStatus } from "src/generated/prisma/client";
 

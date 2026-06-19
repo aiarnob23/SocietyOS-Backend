@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ISubscriptionRepository, SUBSCRIPTION_REPOSITORY } from './ interfaces/subscription-repository.interface';
+import { ISubscriptionRepository, SUBSCRIPTION_REPOSITORY } from './interfaces/subscription-repository.interface';
 import { PlansService } from 'src/plans/plans.service';
 import { AppLogger } from 'src/core/logging/logger.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
