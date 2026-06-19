@@ -11,9 +11,10 @@ import { RolesGuard } from './core/guards/roles.guard';
 import { AppLoggerModule } from './core/logging/logger.module';
 import { RedisModule } from './core/redis/redis.module';
 import { BullMQModule } from './core/queues/bullmq.module';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule],
   controllers: [AppController],
   providers: [
     AppService,
