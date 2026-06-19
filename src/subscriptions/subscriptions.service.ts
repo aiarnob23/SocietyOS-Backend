@@ -82,7 +82,7 @@ export class SubscriptionsService {
     }
 
     //subscription history by user
-    async getSubscriptionHistory(userId: number) {
+    async getMySubscriptionHistory(userId: number) {
         return this.subscriptionRepository.findAllByUserId(userId);
     }
 
@@ -152,9 +152,21 @@ export class SubscriptionsService {
             cancellationNote: note,
             status: SubscriptionStatus.CANCELLED,
         })
+        await this.subscriptionRepository.createSubscriptionHistory({
+            subscriptionId,
+            fromStatus: SubscriptionStatus.ACTIVE,
+            toStatus: SubscriptionStatus.CANCELLED,
+            changeReason: SubscriptionChangeReason.CANCELLED,
+            note,
+            effectiveDate: new Date(),
+        })
         this.logger.info('Subscription cancelled', { subscriptionId, userId, note });
         return cancelled;
     }
+
+
+
+
 
     //calculate billing period
     private calculatePeriodEnd(from: Date, billingInterval: string): Date {

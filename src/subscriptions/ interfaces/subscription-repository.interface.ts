@@ -16,7 +16,7 @@ export interface CreateSubscriptionHistoryInput {
     fromStatus?: SubscriptionStatus;
     toStatus: SubscriptionStatus;
     fromPlanVersionId?: number;
-    toPlanVersionId: number;
+    toPlanVersionId?: number;
     changeReason: SubscriptionChangeReason;
     note?: string;
     proratedAmount?: number;
