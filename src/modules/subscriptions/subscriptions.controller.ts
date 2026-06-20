@@ -10,7 +10,6 @@ import { JwtPayload } from 'src/modules/auth/token.service';
 @Controller('subscriptions')
 export class SubscriptionsController {
     constructor(private readonly subscriptionsService: SubscriptionsService) {}
-
     // create new subscription
     @Post()
     @HttpCode(HttpStatus.CREATED)
