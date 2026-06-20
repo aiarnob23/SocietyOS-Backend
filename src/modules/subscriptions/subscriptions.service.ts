@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ISubscriptionRepository, SUBSCRIPTION_REPOSITORY } from './interfaces/subscription-repository.interface';
-import { PlansService } from 'src/plans/plans.service';
+import { PlansService } from 'src/modules/plans/plans.service';
 import { AppLogger } from 'src/core/logging/logger.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { ConflictException } from 'src/core/exceptions/conflict.exceptions';
@@ -163,9 +163,6 @@ export class SubscriptionsService {
         this.logger.info('Subscription cancelled', { subscriptionId, userId, note });
         return cancelled;
     }
-
-
-
 
 
     //calculate billing period

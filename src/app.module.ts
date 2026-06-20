@@ -11,8 +11,8 @@ import { RolesGuard } from './core/guards/roles.guard';
 import { AppLoggerModule } from './core/logging/logger.module';
 import { RedisModule } from './core/redis/redis.module';
 import { BullMQModule } from './core/queues/bullmq.module';
-import { PlansModule } from './plans/plans.module';
-import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { PlansModule } from './modules/plans/plans.module';
+import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 
 @Module({
   imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule],
