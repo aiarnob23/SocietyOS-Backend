@@ -8,7 +8,7 @@ import { ErrorCodes } from 'src/core/exceptions/error-codes';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { SubscriptionChangeReason, SubscriptionStatus } from 'src/generated/prisma/enums';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { InvoicesService } from 'src/invoices/invoices.service';
+import { InvoicesService } from 'src/modules/invoices/invoices.service';
 
 @Injectable()
 export class SubscriptionsService {
