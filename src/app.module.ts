@@ -13,14 +13,17 @@ import { RedisModule } from './core/redis/redis.module';
 import { BullMQModule } from './core/queues/bullmq.module';
 import { PlansModule } from './modules/plans/plans.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { InvoicesService } from './invoices/invoices.service';
+import { InvoicesModule } from './invoices/invoices.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule],
   controllers: [AppController],
   providers: [
     AppService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    InvoicesService,
   ],
 })
 export class AppModule { }
