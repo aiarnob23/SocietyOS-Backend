@@ -17,24 +17,23 @@ export class PrismaInvoiceRepository implements IInvoiceRepository {
     //create invoice 
     async createInvoice(data: CreateInvoiceInput, tx?: Prisma.TransactionClient): Promise<Invoice> {
         const db = tx ?? this.client;
-        const invoiceNumber = await this.generateInvoiceNumber(tx);
         return db.invoice.create({
             data: {
                 subscriptionId: data.subscriptionId,
                 planVersionId: data.planversionId,
-                invoiceNumber,
-                status: InvoiceStatus.OPEN,
+                invoiceNumber: data.invoiceNumber,
+                status: data.status,
                 billingInterval: data.billinginterval,
                 currency: data.currency,
                 subtotal: data.subtotal,
-                discount: data.discount ?? 0,
-                tax: data.tax ?? 0,
+                discount: data.discount,
+                tax: data.tax,
                 total: data.total,
                 periodStart: data.periodStart,
                 periodEnd: data.periodEnd,
-                dueDate: data.dueDate ?? null,
-                notes: data.notes ?? null,
-                metadata: data.metadata ?? {},
+                dueDate: data.dueDate,
+                notes: data.notes,
+                metadata: data.metadata,
             }
         })
     }
@@ -78,7 +77,7 @@ export class PrismaInvoiceRepository implements IInvoiceRepository {
     }
 
     //generate Invoice number
-    private async generateInvoiceNumber(tx?: Prisma.TransactionClient): Promise<string> {
+    async generateInvoiceNumber(tx?: Prisma.TransactionClient): Promise<string> {
         const db = tx ?? this.client;
         const count = await db.invoice.count();
         const date = new Date();
