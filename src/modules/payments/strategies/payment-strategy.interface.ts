@@ -5,7 +5,6 @@ export interface InitiatePaymentInput {
     userId: number;
     amount: Prisma.Decimal;
     currency: Currency;
-    idemportId: string;
     idempotencyKey: string;
     metadata?: object;
 }
@@ -27,6 +26,6 @@ export interface WebhookResult {
 }
 
 export interface IPaymentStrategy {
-    InitializeOnPreviewAllowlist(input: InitiatePaymentInput): Promise<InitiatePaymentResult>;
+    initiate(input: InitiatePaymentInput): Promise<InitiatePaymentResult>;
     verifyWebhook(rawBody: Buffer, signature: string): Promise<WebhookResult>;
 }

@@ -27,7 +27,12 @@ export const config = {
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD,
   },
-
+  payment:{
+    stripe: {
+      secretKey: process.env.STRIPE_SECRET_KEY || "",
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
+    }
+  },
   aws: {
     region: process.env.AWS_REGION,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
