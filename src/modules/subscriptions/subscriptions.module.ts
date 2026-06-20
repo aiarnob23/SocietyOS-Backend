@@ -5,9 +5,14 @@ import { PrismaModule } from 'src/database/prisma/prisma.module';
 import { PlansModule } from 'src/modules/plans/plans.module';
 import { SUBSCRIPTION_REPOSITORY } from './interfaces/subscription-repository.interface';
 import { PrismaSubscriptionRepository } from './repositories/prisma-subscription.repository';
+import { InvoicesModule } from 'src/invoices/invoices.module';
 
 @Module({
-  imports: [PrismaModule, PlansModule],
+  imports: [
+    PrismaModule,
+    PlansModule,
+    InvoicesModule,
+  ],
   controllers: [SubscriptionsController],
   providers: [
     SubscriptionsService,

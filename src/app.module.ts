@@ -15,15 +15,15 @@ import { PlansModule } from './modules/plans/plans.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { InvoicesService } from './invoices/invoices.service';
 import { InvoicesModule } from './invoices/invoices.module';
+import { PrismaModule } from './database/prisma/prisma.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule ,RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule , PrismaModule, RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule],
   controllers: [AppController],
   providers: [
     AppService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
-    InvoicesService,
   ],
 })
 export class AppModule { }

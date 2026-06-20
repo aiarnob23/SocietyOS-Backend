@@ -9,11 +9,13 @@ import { PrismaInvoiceRepository } from './repositories/prisma-invoice.repositor
   imports: [PrismaModule],
   providers: [
     InvoicesService,
+    PrismaInvoiceRepository,
     {
       provide: INVOICE_REPOSITORY,
-      useExisting: PrismaInvoiceRepository
+      useClass: PrismaInvoiceRepository
     }
   ],
-  controllers: [InvoicesController]
+  controllers: [InvoicesController],
+  exports: [InvoicesService]
 })
 export class InvoicesModule { }

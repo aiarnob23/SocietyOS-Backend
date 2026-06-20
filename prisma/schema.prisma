@@ -316,8 +316,8 @@ model Invoice {
   tax      Decimal? @db.Decimal(10, 2)
   total    Decimal  @db.Decimal(10, 2)
 
-  periodStart DateTime
-  periodEnd   DateTime
+  periodStart DateTime?
+  periodEnd   DateTime?
   dueDate     DateTime?
   paidAt      DateTime?
   voidedAt    DateTime?

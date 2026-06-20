@@ -7,13 +7,17 @@ import { ConflictException } from 'src/core/exceptions/conflict.exceptions';
 import { ErrorCodes } from 'src/core/exceptions/error-codes';
 import { NotFoundException } from 'src/core/exceptions/not-found.exceptions';
 import { SubscriptionChangeReason, SubscriptionStatus } from 'src/generated/prisma/enums';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { InvoicesService } from 'src/invoices/invoices.service';
 
 @Injectable()
 export class SubscriptionsService {
     constructor(
         @Inject(SUBSCRIPTION_REPOSITORY)
         private readonly subscriptionRepository: ISubscriptionRepository,
+        private readonly prisma: PrismaService,
         private readonly plansService: PlansService,
+        private readonly invoiceService: InvoicesService,
         private readonly logger: AppLogger,
     ) { }
 
@@ -36,37 +40,71 @@ export class SubscriptionsService {
                 'No active version found for this plan',
             );
         }
-        //create subscription
-        const subscription = await this.subscriptionRepository.createSubscription({
-            userId,
-            planVersionId: activeVersion.id,
-            billingInterval: dto.billingInterval,
-            status: SubscriptionStatus.PENDING,
-            startDate: new Date(),
-        })
-        this.logger.info('Subscription created', {
-            subscriptionId: subscription.id,
-            userId,
-            planType: dto.planType,
+
+        const result = await this.prisma.$transaction(async (tx) => {
+            //create subscription
+            const subscription = await tx.subscription.create({
+                data: {
+                    userId,
+                    planVersionId: activeVersion.id,
+                    billingInterval: dto.billingInterval,
+                    status: SubscriptionStatus.PENDING,
+                    startDate: new Date(),
+                }
+            })
+            this.logger.info('Subscription created', {
+                subscriptionId: subscription.id,
+                userId,
+                planType: dto.planType,
+            });
+
+            //create subscription history
+            const subscriptionHistory = await tx.subscriptionHistory.create({
+                data: {
+                    subscriptionId: subscription.id,
+                    toStatus: SubscriptionStatus.PENDING,
+                    toPlanVersionId: activeVersion.id,
+                    changeReason: SubscriptionChangeReason.NEW_SUBSCRIPTION,
+                    note: 'New subscription created',
+                    effectiveDate: new Date(),
+                }
+            })
+            this.logger.info('Subscription history created', {
+                subscriptionHistoryId: subscriptionHistory.id,
+                subscriptionId: subscription.id,
+                toStatus: SubscriptionStatus.PENDING,
+                toPlanVersionId: activeVersion.id,
+                changeReason: SubscriptionChangeReason.NEW_SUBSCRIPTION,
+                effectiveDate: new Date(),
+            })
+
+            //create invoice
+            const invoice = await this.invoiceService.createInvoice({
+                subscriptionId: subscription.id,
+                planversionId: activeVersion.id,
+                billinginterval: dto.billingInterval,
+                currency: activeVersion.currency,
+                subtotal: activeVersion.price,
+                total: activeVersion.price,
+                notes: 'New subscription created',
+                metadata: {},
+            }, tx);
+            return { subscription, subscriptionHistory, invoice };
         });
-        //create subscription history
-        const subscriptionHistory = await this.subscriptionRepository.createSubscriptionHistory({
-            subscriptionId: subscription.id,
-            toStatus: SubscriptionStatus.PENDING,
-            toPlanVersionId: activeVersion.id,
-            changeReason: SubscriptionChangeReason.NEW_SUBSCRIPTION,
-            note: 'New subscription created',
-            effectiveDate: new Date(),
+
+        this.logger.info('Subscription creted with invoice', {
+            subscriptionId: result.subscription.id,
+            invoiceId: result.invoice.id,
+            userId: userId,
         })
-        this.logger.info('Subscription history created', {
-            subscriptionHistoryId: subscriptionHistory.id,
-            subscriptionId: subscription.id,
-            toStatus: SubscriptionStatus.PENDING,
-            toPlanVersionId: activeVersion.id,
-            changeReason: SubscriptionChangeReason.NEW_SUBSCRIPTION,
-            effectiveDate: new Date(),
-        })
-        return subscription;
+
+        return {
+            subscriptionId: result.subscription.id,
+            invoiceId: result.invoice.id,
+            amount: result.invoice.total,
+            currency: result.invoice.currency,
+            subscriptionHistory: result.subscriptionHistory.id,
+        };
     }
 
     //my active subscription

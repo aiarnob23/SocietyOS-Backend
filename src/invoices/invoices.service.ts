@@ -21,12 +21,8 @@ export class InvoicesService {
             planversionId: number;
             billinginterval: BillingInterval;
             currency: Currency;
-            subtotal: number;
-            discount?: number;
-            tax?: number;
-            total: number;
-            periodStart: Date;
-            periodEnd: Date;
+            subtotal: Prisma.Decimal;
+            total: Prisma.Decimal;
             dueDate?: Date;
             notes?: string;
             metadata?: object;
