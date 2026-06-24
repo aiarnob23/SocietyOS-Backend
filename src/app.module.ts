@@ -13,12 +13,12 @@ import { RedisModule } from './core/redis/redis.module';
 import { BullMQModule } from './core/queues/bullmq.module';
 import { PlansModule } from './modules/plans/plans.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
-import { InvoicesService } from './modules/invoices/invoices.service';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PrismaModule } from './database/prisma/prisma.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule , PrismaModule, RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule , PrismaModule, RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule, PaymentsModule],
   controllers: [AppController],
   providers: [
     AppService,

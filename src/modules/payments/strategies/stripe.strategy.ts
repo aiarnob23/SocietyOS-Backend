@@ -25,6 +25,10 @@ export class StripeStrategy implements IPaymentStrategy {
             {
                 amount: Math.round(input.amount.toNumber() * 100), // cents
                 currency: input.currency.toLowerCase(),
+                automatic_payment_methods: {
+                    enabled: true,
+                    allow_redirects: 'never',
+                },
                 metadata: {
                     invoiceId: input.invoiceId,
                     userId: input.userId,
@@ -50,11 +54,15 @@ export class StripeStrategy implements IPaymentStrategy {
                 signature,
                 config.payment.stripe.webhookSecret,
             );
-        } catch {
+        } catch (err: any) {
             throw new ConflictException(
                 ErrorCodes.CONFLICT,
                 'Invalid webhook signature',
             );
+        }
+
+        if(!event.type.startsWith('payment_intent')) {
+            return {status: 'IGNORED'} as any;
         }
 
         const paymentIntent = event.data.object as Stripe.PaymentIntent;

@@ -9,6 +9,7 @@ import { AppLogger } from './core/logging/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
     bufferLogs: true,
   });
   app.useLogger(app.get(AppLogger));
@@ -23,7 +24,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     })
   )
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  const logger = app.get(AppLogger);
+  app.useGlobalFilters(new GlobalExceptionFilter(logger));
   app.useGlobalInterceptors(new TransformInterceptor());
   await app.listen(process.env.PORT ?? 3000);
 }

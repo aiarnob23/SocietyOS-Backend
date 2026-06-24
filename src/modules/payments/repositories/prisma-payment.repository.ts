@@ -21,7 +21,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
                 paymentMethod: data.paymentMethod,
                 idempotencyKey: data.idempotencyKey,
                 transactionId: data.transactionId,
-                status: PaymentStatus.PENDING,
+                status: data.status,
                 ipAddress: data.ipAddress,
                 userAgent: data.userAgent,
             },

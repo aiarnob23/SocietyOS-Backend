@@ -7,6 +7,7 @@ export interface CreatePaymentInput {
     invoiceId: number;
     amount: Prisma.Decimal;
     currency: Currency;
+    status: PaymentStatus;
     paymentMethod: PaymentMethod;
     idempotencyKey: string;
     transactionId: string;

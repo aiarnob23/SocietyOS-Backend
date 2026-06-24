@@ -79,6 +79,7 @@ export class PaymentsService {
     async handleWebhook(rawBody: Buffer, signature: string, paymentMethod: PaymentMethod) {
         const strategy = this.strategyFactory.getStrategy(paymentMethod);
         const result = await strategy.verifyWebhook(rawBody, signature);
+        if (result.status === 'IGNORED') return;
 
         if (result.status === 'SUCCESS') {
             await this.processSuccessfulPayment(result);
@@ -116,6 +117,7 @@ export class PaymentsService {
                     paymentMethod: PaymentMethod.CARD,
                     idempotencyKey: result.idempotencyKey,
                     transactionId: result.transactionId,
+                    status: PaymentStatus.SUCCESS,
                     ipAddress: ctx?.ipAddress,
                     userAgent: ctx?.userAgent,
                 }, tx);

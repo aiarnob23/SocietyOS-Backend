@@ -98,7 +98,12 @@ export class AppLogger implements LoggerService {
     info(msg: string, meta?: object) {
         this.logger.info(msg, meta);
     }
+
     http(msg: string, meta?: object) {
         this.logger.http(msg, meta);
     }
+
+    logError(msg: string, meta?: object) {  
+    this.logger.error(msg, meta);
+}
 }

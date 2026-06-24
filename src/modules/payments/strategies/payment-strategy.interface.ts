@@ -21,7 +21,7 @@ export interface WebhookResult {
     idempotencyKey: string;
     invoiceId: number;
     userId: number;
-    status: 'SUCCESS' | 'FAILED';
+    status: 'SUCCESS' | 'FAILED' | 'IGNORED';
     failureReason?: string;
 }
 

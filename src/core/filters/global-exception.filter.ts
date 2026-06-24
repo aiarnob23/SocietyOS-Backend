@@ -7,9 +7,13 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AppException } from '../exceptions/app.exceptions';
+import { AppLogger } from '../logging/logger.service';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  constructor(
+    private readonly logger: AppLogger
+  ) { }
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -42,6 +46,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
       });
     }
+
+    this.logger.logError('Unhandled exception', {
+      error: (exception as Error)?.message,
+      stack: (exception as Error)?.stack,
+      path: request.url,
+    });
 
     // Unexpected error
     const isDev = process.env.NODE_ENV === 'development';
