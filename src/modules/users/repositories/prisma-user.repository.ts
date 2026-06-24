@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CreateUserInput, IUserRepository } from "../interfaces/user-repository.interface";
 import { PrismaService } from "src/database/prisma/prisma.service";
-import { User } from "src/generated/prisma/client";
+import { User, UserRole } from "src/generated/prisma/client";
 
 
 @Injectable()
@@ -53,6 +53,18 @@ export class PrismaUserRepository implements IUserRepository {
                 phone: true,
                 avatarUrl: true,
                 communityId: true
+            }
+        })
+    }
+
+    //update user role
+    updateUserRole(id: number, role: UserRole) {
+        return this.prisma.user.update({
+            where: {
+                id
+            },
+            data: {
+                role
             }
         })
     }

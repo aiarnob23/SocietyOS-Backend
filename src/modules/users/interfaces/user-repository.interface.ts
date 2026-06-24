@@ -19,4 +19,5 @@ export interface IUserRepository {
     findByEmail(email: string): Promise<User | null>;
     getSelfProfileById(id: number): Promise<any>;
     getUserById(id: number): Promise<any>;
+    updateUserRole(id: number, role: UserRole): Promise<User>;
 }

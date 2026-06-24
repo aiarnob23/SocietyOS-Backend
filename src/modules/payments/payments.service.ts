@@ -6,6 +6,7 @@ import {
     PaymentStatus,
     SubscriptionChangeReason,
     SubscriptionStatus,
+    UserRole,
 } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { AppLogger } from 'src/core/logging/logger.service';
@@ -100,7 +101,7 @@ export class PaymentsService {
         const ctx = RequestContext.get();
 
         await this.prisma.$transaction(async (tx) => {
-            // 1. payment create/update
+            //  payment create/update
             if (existing) {
                 await this.paymentRepository.updateStatus(
                     existing.id,
@@ -123,13 +124,13 @@ export class PaymentsService {
                 }, tx);
             }
 
-            // 2. invoice → PAID
+            //  invoice → PAID
             await tx.invoice.update({
                 where: { id: result.invoiceId },
                 data: { status: InvoiceStatus.PAID, paidAt: new Date() },
             });
 
-            // 3. subscription → ACTIVE
+            //  subscription → ACTIVE
             const now = new Date();
             const subscription = await tx.subscription.findUnique({
                 where: { id: invoice.subscriptionId },
@@ -151,7 +152,14 @@ export class PaymentsService {
                 },
             });
 
-            // 4. history
+            // update user role
+            await tx.user.update({
+                where: { id: subscription?.userId },
+                data: { role: UserRole.COMMUNITY_ADMIN },
+            })
+
+
+            //  history
             await tx.subscriptionHistory.create({
                 data: {
                     subscriptionId: invoice.subscriptionId,
