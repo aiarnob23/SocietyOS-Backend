@@ -6,6 +6,7 @@ import { TokenService } from './token.service';
 import { JwtModule } from '@nestjs/jwt';
 import { SessionsModule } from '../sessions/sessions.module';
 import { EncryptionModule } from 'src/core/security/encryption/encryption.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { EncryptionModule } from 'src/core/security/encryption/encryption.module
         EncryptionModule,
         JwtModule.register({}),
         SessionsModule,
+        NotificationsModule,
     ],
     controllers: [
         AuthController

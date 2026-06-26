@@ -14,6 +14,7 @@ import { EncryptionService } from 'src/core/security/encryption/encryption.servi
 import { AppLogger } from 'src/core/logging/logger.service';
 import { REDIS_CLIENT } from 'src/core/redis/redis.constant';
 import Redis from 'ioredis';
+import { NotificationsService } from '../notifications/notification.service';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
         private readonly encryptionService: EncryptionService,
         private readonly tokenService: TokenService,
         private readonly sessionService: SessionService,
+        private readonly notificationService: NotificationsService,
     ) { }
 
     //  REGISTER
@@ -51,6 +53,15 @@ export class AuthService {
         });
 
         //send otp for email and phone verification
+        // await this.notificationService.send(
+        //     'EMAIL',
+        //     'WELCOME',
+        //     user.id,
+        //     {
+        //         email: user.email,
+        //         firstName: user.firstName,
+        //     },
+        // )
 
         //return response
         return {
@@ -101,6 +112,7 @@ export class AuthService {
                 expiresAt: new Date(Date.now() + Number(config.security.jwt.refreshExpiresIn) * 1000),
             }
         );
+        this.logger.info('User logged in successfully', { userId: existingUser.id });
         return {
             message: 'User logged in successfully',
             data: {
