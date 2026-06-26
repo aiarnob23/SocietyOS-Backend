@@ -27,7 +27,7 @@ export const config = {
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD,
   },
-  payment:{
+  payment: {
     stripe: {
       secretKey: process.env.STRIPE_SECRET_KEY || "",
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
@@ -39,13 +39,22 @@ export const config = {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
   },
   email: {
-    awsRegion: process.env.AWS_REGION,
-    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    defaultFromEmail: process.env.DEFAULT_FROM_EMAIL,
-    defaultReplyToEmail: process.env.DEFAULT_REPLY_TO_EMAIL,
-    templatePath: process.env.EMAIL_TEMPLATE_PATH,
-    defaultFromName: process.env.DEFAULT_FROM_NAME,
+    from: process.env.DEFAULT_FROM_EMAIL,
+    awsEmail: {
+      awsRegion: process.env.AWS_REGION,
+      awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      defaultFromEmail: process.env.DEFAULT_FROM_EMAIL,
+      defaultReplyToEmail: process.env.DEFAULT_REPLY_TO_EMAIL,
+      templatePath: process.env.EMAIL_TEMPLATE_PATH,
+      defaultFromName: process.env.DEFAULT_FROM_NAME,
+    },
+    mailtrap: {
+      host: process.env.MAILTRAP_HOST,
+      port: parseInt(process.env.MAILTRAP_PORT || '2525'),
+      user: process.env.MAILTRAP_USER,
+      pass: process.env.MAILTRAP_PASS,
+    },
   },
   logging: {
     level: process.env.LOG_LEVEL || 'info',
@@ -54,6 +63,7 @@ export const config = {
       path: process.env.LOG_FILE_PATH || 'logs/app.log',
     },
   },
+
   security: {
     cors: {
       allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['*'],

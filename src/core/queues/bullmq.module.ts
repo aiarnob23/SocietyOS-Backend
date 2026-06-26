@@ -1,25 +1,27 @@
-// src/core/queues/bullmq.module.ts
 import { Module, Global } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { config } from '../config';
 import { QUEUES } from './queue.constants';
 
+const redisConnection = {
+    host: config.redis.host,
+    port: config.redis.port,
+};
+
+const createQueue = (name: string) => ({
+    provide: name,
+    useFactory: () => new Queue(name, { connection: redisConnection }),
+});
+
 @Global()
 @Module({
     providers: [
-        {
-            provide: QUEUES.SESSION,
-            useFactory: () => {
-                return new Queue(QUEUES.SESSION, {
-                    connection: {
-                        host: config.redis.host,
-                        port: config.redis.port,
-                    },
-                });
-            },
-            inject: [],
-        },
+        createQueue(QUEUES.SESSION),
+        createQueue(QUEUES.NOTIFICATION),
     ],
-    exports: [QUEUES.SESSION],
+    exports: [
+        QUEUES.SESSION,
+        QUEUES.NOTIFICATION,
+    ],
 })
-export class BullMQModule { }
+export class BullMQModule {}
