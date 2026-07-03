@@ -17,9 +17,10 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { CommunitiesModule } from './modules/communities/communities.module';
 
 @Module({
-  imports: [RedisModule, BullMQModule, AppLoggerModule , PrismaModule, RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule, PaymentsModule, NotificationsModule],
+  imports: [RedisModule, BullMQModule, AppLoggerModule , PrismaModule, RequestContextModule, UsersModule, AuthModule, SessionsModule, PlansModule, SubscriptionsModule, InvoicesModule, PaymentsModule, NotificationsModule, CommunitiesModule,],
   controllers: [AppController],
   providers: [
     AppService,

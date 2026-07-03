@@ -195,7 +195,7 @@ model OTP {
 model Community {
   id             Int     @id @default(autoincrement())
   name           String
-  slug           String  @unique
+  slug           String?  @unique
   registrationNo String?
   description    String?
   address        String
