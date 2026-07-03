@@ -108,6 +108,12 @@ enum SubscriptionChangeReason {
   TRIAL_ENDED
 }
 
+enum PropertyType {
+  BUILDING
+  PLOT
+  VILLA
+}
+
 // ─────────────────────────────────────────────
 // USER & AUTH
 // ─────────────────────────────────────────────
@@ -142,6 +148,8 @@ model User {
   otps               OTP[]
   subscriptions      Subscription[]
   auditLogs          AuditLog[]
+  managedProperties  Property[]     @relation("PropertyAdmin")
+  ownedFlats         Flat[]         @relation("FlatOwner")
 
   @@index([email, phone, id])
   @@index([communityId])
@@ -186,33 +194,6 @@ model OTP {
 
   @@index([identifier, type])
   @@index([userId])
-}
-
-// ─────────────────────────────────────────────
-// COMMUNITY
-// ─────────────────────────────────────────────
-
-model Community {
-  id             Int     @id @default(autoincrement())
-  name           String
-  slug           String?  @unique
-  registrationNo String?
-  description    String?
-  address        String
-  city           String?
-  country        String  @default("BD")
-  logoUrl        String?
-  createdById    Int
-
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  createdBy User   @relation("CommunityCreator", fields: [createdById], references: [id])
-  users     User[]
-
-  @@index([createdById])
 }
 
 // ─────────────────────────────────────────────
@@ -423,4 +404,73 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([action])
   @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// COMMUNITY & PROPERTY
+// ─────────────────────────────────────────────
+
+model Community {
+  id             Int     @id @default(autoincrement())
+  name           String
+  slug           String? @unique
+  registrationNo String?
+  description    String?
+  address        String
+  city           String?
+  country        String  @default("BD")
+  logoUrl        String?
+  createdById    Int
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  createdBy  User       @relation("CommunityCreator", fields: [createdById], references: [id])
+  users      User[]
+  properties Property[]
+
+  @@index([createdById])
+}
+
+model Property {
+  id          Int          @id @default(autoincrement())
+  communityId Int
+  name        String
+  type        PropertyType
+  address     String?
+  totalFlats  Int?
+  adminId     Int?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  community Community @relation(fields: [communityId], references: [id])
+  admin     User?     @relation("PropertyAdmin", fields: [adminId], references: [id])
+  flats     Flat[]
+
+  @@index([communityId])
+  @@index([adminId])
+}
+
+model Flat {
+  id         Int    @id @default(autoincrement())
+  propertyId Int
+  unitNumber String
+  floor      Int?
+  ownerId    Int?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  owner    User?    @relation("FlatOwner", fields: [ownerId], references: [id])
+
+  @@index([propertyId])
+  @@index([ownerId])
 }
