@@ -19,6 +19,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CommunitiesModule } from './modules/communities/communities.module';
 import { PropertiesModule } from './modules/properties/properties.module';
+import { ServiceProviderModule } from './modules/service-providers/service-providers.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { PropertiesModule } from './modules/properties/properties.module';
     PaymentsModule,
     NotificationsModule,
     CommunitiesModule,
-    PropertiesModule
+    PropertiesModule,
+    ServiceProviderModule
   ],
   controllers: [AppController],
   providers: [
