@@ -501,7 +501,7 @@ model Flat {
 model ServiceProvider {
   id          Int                   @id @default(autoincrement())
   name        String
-  comminityId Int
+  communityId Int
   addedById   Int
   category    ServiceCategory
   status      ServiceProviderStatus @default(ACTIVE)
@@ -516,9 +516,9 @@ model ServiceProvider {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  community Community @relation(fields: [comminityId], references: [id])
+  community Community @relation(fields: [communityId], references: [id])
   addedBy   User      @relation("ServiceProviderAddedBy", fields: [addedById], references: [id])
 
-  @@index([comminityId])
+  @@index([communityId])
   @@index([category])
 }
