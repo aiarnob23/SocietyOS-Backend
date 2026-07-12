@@ -7,60 +7,65 @@ import { REDIS_CLIENT } from '../../redis/redis.constant';
 
 @Injectable()
 export class TokenBucketService implements OnModuleInit {
-  private sha!: string;
+    private sha!: string;
 
-  constructor(
-    @Inject(REDIS_CLIENT)
-    private readonly redis: Redis,
-  ) {}
+    constructor(
+        @Inject(REDIS_CLIENT)
+        private readonly redis: Redis,
+    ) { }
 
-  async onModuleInit(): Promise<void> {
-    this.sha = await this.loadScript();
-  }
-
-  private async loadScript(): Promise<string> {
-    const script = await fs.readFile(
-      join(__dirname, '../scripts/token-bucket.lua'),
-      'utf8',
-    );
-
-    const sha = await this.redis.script('LOAD', script);
-
-    if (typeof sha !== 'string') {
-      throw new Error('Failed to load token bucket lua script.');
+    async onModuleInit(): Promise<void> {
+        this.sha = await this.loadScript();
     }
 
-    return sha;
-  }
+    private async loadScript(): Promise<string> {
+        const script = await fs.readFile(
+            join(__dirname, '../scripts/token-bucket.lua'),
+            'utf8',
+        );
 
-  async consume(
-    key: string,
-    capacity: number,
-    refillRate: number,
-    requestedTokens = 1,
-  ): Promise<{
-    allowed: boolean;
-    remainingTokens: number;
-  }> {
-    const now = Math.floor(Date.now() / 1000);
+        const sha = await this.redis.script('LOAD', script);
 
-    const result = await this.redis.evalsha(
-      this.sha,
-      1,
-      key,
-      capacity,
-      refillRate,
-      now,
-      requestedTokens,
-    );
+        if (typeof sha !== 'string') {
+            throw new Error('Failed to load token bucket lua script.');
+        }
 
-    if (!Array.isArray(result) || result.length < 2) {
-      throw new Error('Invalid response returned from redis lua script.');
+        return sha;
     }
 
-    return {
-      allowed: Number(result[0]) === 1,
-      remainingTokens: Number(result[1]),
-    };
-  }
+    async consume(
+        key: string,
+        capacity: number,
+        refillRate: number,
+        requestedTokens = 1,
+    ): Promise<{
+        allowed: boolean;
+        remainingTokens: number;
+        retryAfter: number;
+    }> {
+        const now = Math.floor(Date.now() / 1000);
+
+        const result = await this.redis.evalsha(
+            this.sha,
+            1,
+            key,
+            capacity,
+            refillRate,
+            now,
+            requestedTokens,
+        );
+
+        if (!Array.isArray(result) || result.length < 2) {
+            throw new Error('Invalid response returned from redis lua script.');
+        }
+
+        const remainingTokens = Number(result[1]);
+        const retryAfter = remainingTokens >= 1 ? 0 : Math.ceil((1 - remainingTokens) / refillRate);
+
+        return {
+            allowed: Number(result[0]) === 1,
+            remainingTokens,
+            retryAfter,
+        };
+    }
 }
