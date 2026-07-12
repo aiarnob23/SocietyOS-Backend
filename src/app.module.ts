@@ -20,11 +20,14 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { CommunitiesModule } from './modules/communities/communities.module';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { ServiceProviderModule } from './modules/service-providers/service-providers.module';
+import { RateLimitModule } from './core/rate-limit/module/ rate-limit.module';
+import { RateLimitGuard } from './core/rate-limit/guards/rate-limit.guard';
 
 @Module({
   imports: [
     RedisModule,
     BullMQModule,
+    RateLimitModule,
     AppLoggerModule,
     PrismaModule,
     RequestContextModule,
@@ -45,6 +48,7 @@ import { ServiceProviderModule } from './modules/service-providers/service-provi
     AppService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: RateLimitGuard },
   ],
 })
 export class AppModule { }

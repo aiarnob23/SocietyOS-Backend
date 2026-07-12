@@ -10,7 +10,6 @@ export const ErrorCodes = {
   //Authorization
   FORBIDDEN: 'FORBIDDEN',
   
-
   // User
   USER_NOT_FOUND: 'USER_NOT_FOUND',
 
@@ -26,4 +25,7 @@ export const ErrorCodes = {
   // Payment
   PAYMENT_FAILED:    'PAYMENT_FAILED',
   DUPLICATE_PAYMENT: 'DUPLICATE_PAYMENT',
+
+  //Rate Limit
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
 } as const;

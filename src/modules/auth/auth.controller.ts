@@ -9,6 +9,8 @@ import { ErrorCodes } from 'src/core/exceptions/error-codes';
 import { AuthTokenResponse } from './types/auth-token-response.type';
 import { Public } from 'src/core/decorators/public.decorator';
 import { Roles } from 'src/core/decorators/roles.decorator';
+import { RateLimit } from 'src/core/rate-limit/decorators/rate-limit.decorator';
+import { LOGIN_BUCKET } from 'src/core/rate-limit/constants/buckets';
 
 const REFRESH_COOKIE_OPTIONS = {
     httpOnly: true,
@@ -32,6 +34,7 @@ export class AuthController {
 
     //Login
     @Public()
+    @RateLimit(LOGIN_BUCKET)
     @Post('login')
     @HttpCode(HttpStatus.OK)
     async login(

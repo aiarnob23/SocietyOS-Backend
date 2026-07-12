@@ -19,6 +19,10 @@ export class TokenBucketService implements OnModuleInit {
     }
 
     private async loadScript(): Promise<string> {
+         const path = join(__dirname, '../scripts/token-bucket.lua');
+
+  console.log('DIRNAME:', __dirname);
+  console.log('LUA PATH:', path);
         const script = await fs.readFile(
             join(__dirname, '../scripts/token-bucket.lua'),
             'utf8',
