@@ -132,6 +132,32 @@ enum ServiceProviderStatus {
   SUSPENDED
 }
 
+enum ComplainStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  RESOLVED
+  REJECTED
+}
+
+enum ComplainCategory {
+  MAINTENANCE
+  NOISE
+  SECURITY
+  WATER
+  ELECTRICITY
+  GAS
+  PARKING
+  OTHER
+}
+
+enum ComplainPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
 // ─────────────────────────────────────────────
 // USER & AUTH
 // ─────────────────────────────────────────────
@@ -169,6 +195,7 @@ model User {
   managedProperties  Property[]        @relation("PropertyAdmin")
   ownedFlats         Flat[]            @relation("FlatOwner")
   addedServices      ServiceProvider[] @relation("ServiceProviderAddedBy")
+  submittedComplaints  Complaint[] @relation("ComplaintSubmitter")
 
   @@index([email, phone, id])
   @@index([communityId])
@@ -450,6 +477,7 @@ model Community {
   users            User[]
   properties       Property[]
   serviceProviders ServiceProvider[]
+  complaints       Complaint[]
 
   @@index([createdById])
 }
@@ -468,9 +496,10 @@ model Property {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  community Community @relation(fields: [communityId], references: [id])
-  admin     User?     @relation("PropertyAdmin", fields: [adminId], references: [id])
-  flats     Flat[]
+  community  Community   @relation(fields: [communityId], references: [id])
+  admin      User?       @relation("PropertyAdmin", fields: [adminId], references: [id])
+  flats      Flat[]
+  complaints Complaint[]
 
   @@index([communityId])
   @@index([adminId])
@@ -488,8 +517,9 @@ model Flat {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  property Property @relation(fields: [propertyId], references: [id])
-  owner    User?    @relation("FlatOwner", fields: [ownerId], references: [id])
+  property   Property    @relation(fields: [propertyId], references: [id])
+  owner      User?       @relation("FlatOwner", fields: [ownerId], references: [id])
+  complaints Complaint[]
 
   @@index([propertyId])
   @@index([ownerId])
@@ -521,4 +551,43 @@ model ServiceProvider {
 
   @@index([communityId])
   @@index([category])
+}
+
+// ─────────────────────────────────────────────
+// Complaints
+// ─────────────────────────────────────────────
+model Complaint {
+  id            Int  @id @default(autoincrement())
+  communityId   Int
+  flatId        Int?
+  propertyId    Int?
+  submittedById Int
+
+  title       String
+  description String
+  category    ComplainCategory
+  priority    ComplainPriority @default(LOW)
+  status      ComplainStatus   @default(OPEN)
+
+  resolvedAt    DateTime?
+  closedAt      DateTime?
+  rejectedAt    DateTime?
+  rejectionNote String?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  community   Community @relation(fields: [communityId], references: [id])
+  property    Property? @relation(fields: [propertyId], references: [id])
+  flat        Flat?     @relation(fields: [flatId], references: [id])
+  submittedBy User              @relation("ComplaintSubmitter", fields: [submittedById], references: [id])
+
+  @@index([communityId])
+  @@index([submittedById])
+  @@index([category])
+  @@index([priority])
+  @@index([status])
+  @@index([rejectedAt])
 }
