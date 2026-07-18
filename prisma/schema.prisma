@@ -158,6 +158,15 @@ enum ComplainPriority {
   URGENT
 }
 
+enum NoticeAudience {
+  ALL
+  COMMUNITY_MEMBER
+  PROPERTY_ADMIN
+  FLAT_OWNER
+  TENANT
+  SERVICE_PROVIDER
+}
+
 // ─────────────────────────────────────────────
 // USER & AUTH
 // ─────────────────────────────────────────────
@@ -186,16 +195,16 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  sessions           UserSession[]
-  community          Community?        @relation(fields: [communityId], references: [id])
-  createdCommunities Community[]       @relation("CommunityCreator")
-  otps               OTP[]
-  subscriptions      Subscription[]
-  auditLogs          AuditLog[]
-  managedProperties  Property[]        @relation("PropertyAdmin")
-  ownedFlats         Flat[]            @relation("FlatOwner")
-  addedServices      ServiceProvider[] @relation("ServiceProviderAddedBy")
-  submittedComplaints  Complaint[] @relation("ComplaintSubmitter")
+  sessions            UserSession[]
+  community           Community?        @relation(fields: [communityId], references: [id])
+  createdCommunities  Community[]       @relation("CommunityCreator")
+  otps                OTP[]
+  subscriptions       Subscription[]
+  auditLogs           AuditLog[]
+  managedProperties   Property[]        @relation("PropertyAdmin")
+  ownedFlats          Flat[]            @relation("FlatOwner")
+  addedServices       ServiceProvider[] @relation("ServiceProviderAddedBy")
+  submittedComplaints Complaint[]       @relation("ComplaintSubmitter")
 
   @@index([email, phone, id])
   @@index([communityId])
@@ -582,12 +591,38 @@ model Complaint {
   community   Community @relation(fields: [communityId], references: [id])
   property    Property? @relation(fields: [propertyId], references: [id])
   flat        Flat?     @relation(fields: [flatId], references: [id])
-  submittedBy User              @relation("ComplaintSubmitter", fields: [submittedById], references: [id])
+  submittedBy User      @relation("ComplaintSubmitter", fields: [submittedById], references: [id])
 
   @@index([communityId])
   @@index([submittedById])
-  @@index([category])
-  @@index([priority])
   @@index([status])
-  @@index([rejectedAt])
+}
+
+// ─────────────────────────────────────────────
+//  NOTICE
+// ─────────────────────────────────────────────
+model Notice {
+  id          Int    @id @default(autoincrement())
+  communityId Int
+  createdById Int
+  title       String
+  description String
+
+  isDeleted         Boolean            @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  noticeTargetRoles NoticeTargetRole[]
+
+  @@index([communityId])
+}
+
+model NoticeTargetRole {
+  id       Int      @id @default(autoincrement())
+  noticeId Int
+  role     UserRole
+
+  notice Notice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@unique([noticeId, role])
 }
