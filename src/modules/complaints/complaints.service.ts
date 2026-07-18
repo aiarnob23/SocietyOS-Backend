@@ -8,7 +8,9 @@ import { ForbiddenException } from "src/core/exceptions/forbidden.exception";
 import { ErrorCodes } from "src/core/exceptions/error-codes";
 import { NotFoundException } from "src/core/exceptions/not-found.exceptions";
 import { UpdateStatusDto } from "./dto/update-status.dto";
-import { ComplainStatus } from "src/generated/prisma/enums";
+import { ComplainStatus, UserRole } from "src/generated/prisma/enums";
+import { UpdateComplaintDto } from "./dto/update-complaint.dto";
+import { Complaint } from "src/generated/prisma/client";
 
 @Injectable()
 export class ComplaintsService {
@@ -82,15 +84,23 @@ export class ComplaintsService {
         this.logger.info(`Complaints retrieved for community ${user.communityId} count: ${complaints.length}`);
         return complaints;
     }
-
+    //update complaint
+    async updateComplaint(currentUser: JwtPayload, id: number, dto: UpdateComplaintDto) {
+        const complaint = await this.getComplaintById(id);
+        await this.canManageComplaint(currentUser, complaint);
+        const updated = await this.complaintRepository.update(id, dto);
+        this.logger.info('Complaint updated', { complaintId: id, userId: currentUser.userId });
+        return updated;
+    }
     //update status
     async updateStatus(currentUser: JwtPayload, id: number, dto: UpdateStatusDto) {
         const complaint = await this.getComplaintById(id);
+        await this.canManageComplaint(currentUser, complaint);
         const now = new Date();
         const extraData: any = {};
-        if(dto.status === ComplainStatus.RESOLVED) extraData.resolvedAt = now;
-        if(dto.status === ComplainStatus.CLOSED) extraData.closedAt = now;
-        if(dto.status === ComplainStatus.REJECTED) {
+        if (dto.status === ComplainStatus.RESOLVED) extraData.resolvedAt = now;
+        if (dto.status === ComplainStatus.CLOSED) extraData.closedAt = now;
+        if (dto.status === ComplainStatus.REJECTED) {
             extraData.rejectedAt = now;
             extraData.rejectionNote = dto.rejectionNote;
         }
@@ -98,5 +108,30 @@ export class ComplaintsService {
         this.logger.info('Complaint status updated', { complaintId: id, userId: currentUser.userId });
         return updated;
     }
+
+    //can manage complaint
+    private async canManageComplaint(
+        currentUser: JwtPayload,
+        complaint: Complaint,
+    ) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: currentUser.userId },
+            select: { role: true },
+        });
+        const isOwner = complaint.submittedById === currentUser.userId;
+        const adminRoles: UserRole[] = [
+            UserRole.SUPER_ADMIN,
+            UserRole.ADMIN,
+            UserRole.COMMUNITY_ADMIN,
+        ];
+        const isAdmin = user ? adminRoles.includes(user.role) : false;
+        if (!isOwner && !isAdmin) {
+            throw new ForbiddenException(
+                ErrorCodes.FORBIDDEN,
+                'You do not have permission to manage this complaint',
+            );
+        }
+    }
+
 
 }

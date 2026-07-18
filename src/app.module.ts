@@ -22,6 +22,7 @@ import { PropertiesModule } from './modules/properties/properties.module';
 import { ServiceProviderModule } from './modules/service-providers/service-providers.module';
 import { RateLimitModule } from './core/rate-limit/module/ rate-limit.module';
 import { RateLimitGuard } from './core/rate-limit/guards/rate-limit.guard';
+import { ComplaintsModule } from './modules/complaints/complaints.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { RateLimitGuard } from './core/rate-limit/guards/rate-limit.guard';
     NotificationsModule,
     CommunitiesModule,
     PropertiesModule,
-    ServiceProviderModule
+    ServiceProviderModule,
+    ComplaintsModule,
   ],
   controllers: [AppController],
   providers: [
