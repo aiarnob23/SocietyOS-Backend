@@ -158,15 +158,6 @@ enum ComplainPriority {
   URGENT
 }
 
-enum NoticeAudience {
-  ALL
-  COMMUNITY_MEMBER
-  PROPERTY_ADMIN
-  FLAT_OWNER
-  TENANT
-  SERVICE_PROVIDER
-}
-
 // ─────────────────────────────────────────────
 // USER & AUTH
 // ─────────────────────────────────────────────
@@ -205,6 +196,7 @@ model User {
   ownedFlats          Flat[]            @relation("FlatOwner")
   addedServices       ServiceProvider[] @relation("ServiceProviderAddedBy")
   submittedComplaints Complaint[]       @relation("ComplaintSubmitter")
+  createdNotices      Notice[]          @relation("NoticeCreator")
 
   @@index([email, phone, id])
   @@index([communityId])
@@ -487,6 +479,7 @@ model Community {
   properties       Property[]
   serviceProviders ServiceProvider[]
   complaints       Complaint[]
+  notices          Notice[]
 
   @@index([createdById])
 }
@@ -608,11 +601,14 @@ model Notice {
   title       String
   description String
 
-  isDeleted         Boolean            @default(false)
-  deletedAt         DateTime?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   noticeTargetRoles NoticeTargetRole[]
+  community         Community          @relation(fields: [communityId], references: [id])
+  createdBy         User               @relation("NoticeCreator", fields: [createdById], references: [id])
 
   @@index([communityId])
 }
