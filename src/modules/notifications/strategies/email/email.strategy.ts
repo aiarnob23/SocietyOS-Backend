@@ -9,6 +9,7 @@ import {
 import { paymentSuccessTemplate } from './templates/payment-success.template';
 import { welcomeTemplate } from './templates/welcome.template';
 import { subscriptionCreatedTemplate } from './templates/subscription-created.template';
+import { noticePublishedTemplate } from './templates/notice-published.template';
 
 @Injectable()
 export class EmailStrategy implements INotificationStrategy {
@@ -49,6 +50,8 @@ export class EmailStrategy implements INotificationStrategy {
             //     return subscriptionCancelledTemplate(payload.data as any);
             case 'SUBSCRIPTION_CREATED':
                 return subscriptionCreatedTemplate(payload.data as any);
+            case 'NOTICE_PUBLISHED':
+                return noticePublishedTemplate(payload.data as any);
             default:
                 return null;
         }

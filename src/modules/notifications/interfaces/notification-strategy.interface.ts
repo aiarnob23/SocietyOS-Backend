@@ -7,11 +7,12 @@ export type NotificationEvent =
     | 'PAYMENT_SUCCESS'
     | 'WELCOME'
     | 'SUBSCRIPTION_CREATED'
-    | 'SUBSCRIPTION_CANCELLED';
+    | 'SUBSCRIPTION_CANCELLED'
+    | 'NOTICE_PUBLISHED';
 
 export interface NotificationPayload {
     userId: number;
-    event: NotificationEvent;
+    event: NotificationEvent | string;
     data: Record<string, any>;
 }
 

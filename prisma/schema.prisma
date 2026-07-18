@@ -612,7 +612,7 @@ model Notice {
 
   @@index([communityId])
 }
-
+ 
 model NoticeTargetRole {
   id       Int      @id @default(autoincrement())
   noticeId Int
