@@ -7,6 +7,7 @@ export type NotificationEvent =
     | 'PAYMENT_SUCCESS'
     | 'WELCOME'
     | 'SUBSCRIPTION_CREATED'
+    | 'OTP_SENT'
     | 'SUBSCRIPTION_CANCELLED'
     | 'NOTICE_PUBLISHED';
 

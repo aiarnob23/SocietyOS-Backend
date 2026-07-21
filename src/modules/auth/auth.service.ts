@@ -15,6 +15,8 @@ import { AppLogger } from 'src/core/logging/logger.service';
 import { REDIS_CLIENT } from 'src/core/redis/redis.constant';
 import Redis from 'ioredis';
 import { NotificationsService } from '../notifications/notification.service';
+import { OTPService } from '../otp/otp.service';
+import { OTPType } from 'src/generated/prisma/enums';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +28,7 @@ export class AuthService {
         private readonly tokenService: TokenService,
         private readonly sessionService: SessionService,
         private readonly notificationService: NotificationsService,
+        private readonly otpService: OTPService,
     ) { }
 
     //  REGISTER
@@ -53,15 +56,11 @@ export class AuthService {
         });
 
         //send otp for email and phone verification
-        // await this.notificationService.send(
-        //     'EMAIL',
-        //     'WELCOME',
-        //     user.id,
-        //     {
-        //         email: user.email,
-        //         firstName: user.firstName,
-        //     },
-        // )
+        await this.otpService.sendOTP(
+            user.email,
+            OTPType.EMAIL_VERIFICATION,
+            user.id,
+        )
 
         //return response
         return {

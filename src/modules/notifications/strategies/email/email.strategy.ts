@@ -10,6 +10,7 @@ import { paymentSuccessTemplate } from './templates/payment-success.template';
 import { welcomeTemplate } from './templates/welcome.template';
 import { subscriptionCreatedTemplate } from './templates/subscription-created.template';
 import { noticePublishedTemplate } from './templates/notice-published.template';
+import { otpTemplate } from './templates/otp.template';
 
 @Injectable()
 export class EmailStrategy implements INotificationStrategy {
@@ -52,6 +53,8 @@ export class EmailStrategy implements INotificationStrategy {
                 return subscriptionCreatedTemplate(payload.data as any);
             case 'NOTICE_PUBLISHED':
                 return noticePublishedTemplate(payload.data as any);
+            case 'OTP_SENT':
+                return otpTemplate(payload.data as any);
             default:
                 return null;
         }

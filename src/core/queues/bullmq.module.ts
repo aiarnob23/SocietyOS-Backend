@@ -18,10 +18,12 @@ const createQueue = (name: string) => ({
     providers: [
         createQueue(QUEUES.SESSION),
         createQueue(QUEUES.NOTIFICATION),
+        createQueue(QUEUES.CLEANUP),
     ],
     exports: [
         QUEUES.SESSION,
         QUEUES.NOTIFICATION,
+        QUEUES.CLEANUP,
     ],
 })
 export class BullMQModule {}

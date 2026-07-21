@@ -24,6 +24,7 @@ import { RateLimitModule } from './core/rate-limit/module/ rate-limit.module';
 import { RateLimitGuard } from './core/rate-limit/guards/rate-limit.guard';
 import { ComplaintsModule } from './modules/complaints/complaints.module';
 import { NoticesModule } from './modules/notices/notices.module';
+import { OTPModule } from './modules/otp/otp.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { NoticesModule } from './modules/notices/notices.module';
     RequestContextModule,
     UsersModule,
     AuthModule,
+    OTPModule,
     SessionsModule,
     PlansModule,
     SubscriptionsModule,
